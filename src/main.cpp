@@ -54,7 +54,7 @@ void setup()
     // Initialise le module led en arc
     leds_chapeau.init();        // première étape
     leds_chapeau.setBrightness(50);
-    leds_chapeau.setSpeed(1000);
+    leds_chapeau.setSpeed(5000);
     leds_chapeau.setSegment();
     leds_chapeau.setColor(0x0000FF);
     leds_chapeau.setMode(FX_MODE_THEATER_CHASE_RAINBOW);
