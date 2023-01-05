@@ -6,6 +6,7 @@
 
 #include <Arduino.h>
 
+#include <Encoder.h>
 #include <WS2812FX.h>
 
 // Which pin on the Arduino is connected to the NeoPixels?
@@ -13,7 +14,7 @@
 #define LED_PIN 3
 
 // How many NeoPixels are attached to the Arduino?
-#define LED_COUNT2 8
+#define LED_COUNT2 32
 #define LED_COUNT 15
 
 // Potentiomètres et leur led
@@ -23,75 +24,109 @@
 #define POT_LED_2 A4
 
 unsigned long led_interval = 5000;
-WS2812FX leds = WS2812FX(LED_COUNT, LED_PIN, NEO_GRBW + NEO_KHZ800);
+WS2812FX leds_chapeau = WS2812FX(LED_COUNT, LED_PIN, NEO_GRBW + NEO_KHZ800);
+WS2812FX leds_theatre = WS2812FX(LED_COUNT2, LED_PIN2, NEO_GRBW + NEO_KHZ800);
 //   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
 //   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
 
+encoder monEncodeur(0, 1);
+
 // setup() function -- runs once at startup --------------------------------
 void setup()
 {
     Serial.begin(115200);
-    while (!Serial)
-        ;        // wait for serial port to connect. Needed for Leonardo
-    leds.init();
-    leds.setBrightness(50);
-    leds.setSpeed(1000);
-    leds.setColor(0x0000FF);
-    leds.setMode(FX_MODE_FIREWORKS_RANDOM);
-    leds.start();
 
+    // attend que le port série soit connecté ou 2 secondes (module autonome)
+    while ((!Serial) && (millis() < 2000));
+
+    // Initialise le module led en arc
+    leds_theatre.init();        // première étape
+    leds_theatre.setBrightness(50);
+    leds_theatre.setSpeed(5000);
+    leds_theatre.setSegment();
+    leds_theatre.setColor(0x0000FF);
+    leds_theatre.setMode(FX_MODE_THEATER_CHASE_RAINBOW);
+    leds_theatre.start();
+
+    // Initialise le module led en arc
+    leds_chapeau.init();        // première étape
+    leds_chapeau.setBrightness(50);
+    leds_chapeau.setSpeed(1000);
+    leds_chapeau.setSegment();
+    leds_chapeau.setColor(0x0000FF);
+    leds_chapeau.setMode(FX_MODE_THEATER_CHASE_RAINBOW);
+    leds_chapeau.start();
+
+    // Initialise les entrées des potentiomètres et leur led
     pinMode(POT_1, INPUT);
     pinMode(POT_2, INPUT);
-
     pinMode(POT_LED_1, OUTPUT);
     pinMode(POT_LED_2, OUTPUT);
 }
 
 // loop() function -- runs repeatedly as long as board is on ---------------
-
 void loop()
 {
-#define TIMER_MS 5000
+    // Fréquence de lecture des potentiomètres
 #define TIMER_ADC 500
 
-    static unsigned long last_change = 0;
-    static unsigned long last_adc = 0;
-    static unsigned long now = 0;
+    static unsigned long last_adc = 0;      // Dernière lecture des potentiomètre
+    static uint8_t pos_encoder = 10;        // Position de l'encodeur
 
-    uint8_t modeLed = leds.getMode();
+    unsigned long now;           // Lecture du temps dans la boucle
 
-    now = millis();
+    now = millis();         // Lecture du temps dans cette boucle
 
-    leds.service();
+    leds_theatre.service();         // Service des leds du tour
+    leds_chapeau.service();         // Service des leds du dessus
 
-    if (now - last_change > TIMER_MS)
+    // Relève la présence de décalage sur l'encodeur rotatif
+    int8_t decalage = monEncodeur.lecture();
+
+    // Test le décalage
+    if (decalage)
     {
-        leds.setMode((leds.getMode() + 1) % leds.getModeCount());
+        pos_encoder += decalage;    // Modifie la position
+        if (pos_encoder >= leds_theatre.getModeCount()) // test si dans la liste des modes
+        {
+            // Si en dehors, repart à 0
+            pos_encoder = 0;
+        }
+        // Change le mode
+        leds_theatre.setMode(pos_encoder);
+
+        // Log sur la sortie série
         Serial.print("Mode : ");
-        Serial.println(leds.getModeName(leds.getMode()));
-        last_change = now;
+        Serial.print(leds_theatre.getMode());
+        Serial.print(" - ");
+        Serial.println(leds_theatre.getModeName(leds_theatre.getMode()));
     }
 
+    // Test si fréquence de lecture de l'adc écoulée
     if (now - last_adc > TIMER_ADC)
     {
+        // Oui, sauve la nouvelle heure
         last_adc = now;
+
+        // Lit le potentiomètre pour la vitesse
         uint16_t val_adc = analogRead(POT_1);
-        digitalWrite(POT_LED_1, (uint8_t)(0x00FF & (val_adc >> 2)));
-
+        // Calcul pour positionner entre 10 (rapide) et 4106 (lent)
         val_adc = ((val_adc) << 2) + 10;
-        Serial.print("pot 1 : ");
-        Serial.println(val_adc);
+        // Fixe la nouvelle vitesse
+        leds_theatre.setSpeed(val_adc);
 
-        leds.setSpeed(val_adc);
-
+        // Lit le potentiomètre de luminosité
         val_adc = analogRead(POT_2);
+        // Calcul pour le positionner entre 0 et 255
         val_adc = (uint8_t)(0x00FF & (val_adc >> 2));
-        digitalWrite(POT_LED_2, val_adc);
-        Serial.print("pot 2 : ");
+        // Fixe la nouvelle luminosité
+        leds_theatre.setBrightness(val_adc);
+        Serial.print("Luminosité : ");
         Serial.println(val_adc);
-        leds.setBrightness(val_adc);
     }
 }
+
+//-------------------------- That's all, Folks ! ------------------------------
