@@ -48,7 +48,7 @@ void setup()
     leds_theatre.setSpeed(5000);
     leds_theatre.setSegment();
     leds_theatre.setColor(0x0000FF);
-    leds_theatre.setMode(FX_MODE_THEATER_CHASE_RAINBOW);
+    leds_theatre.setMode(FX_MODE_DUAL_SCAN);
     leds_theatre.start();
 
     // Initialise le module led en arc
