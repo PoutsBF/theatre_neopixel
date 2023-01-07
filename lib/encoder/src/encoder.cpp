@@ -44,31 +44,30 @@ void encoder::interruption(void)
     // Voir readme pour l'usage
     static uint8_t etat = 0x00;
 
+    // Fige le temps
     unsigned long time = millis();
+
+    // Lit l'état des entrées A et B
     uint8_t BP0_val = ! digitalRead(BP0_pin);
     uint8_t BP1_val = ! digitalRead(BP1_pin);
 
+    // Teste si on est dans une fenêtre d'occlusion pour le débounce
     if ((time - BP_rebond) > BP_delai_rebond)
     {
-        BP_rebond = time;
-        etat |= 0b10000000;
-        etat |= BP0_val ? (0b10000100) : (0);
-        etat |= BP1_val ? (0b10001000) : (0);
-    }
+        BP_rebond = time;   // Déclenche la fenêtre d'exclusion
 
-    if(etat & 0b10000000)
-    {
-        etat &= 0b01111111;
+        etat |= BP0_val ? (0b00000100) : (0);       // Si l'entrée B active, mets le bit 3
+        etat |= BP1_val ? (0b00001000) : (0);       // Si l'entrée A active, mets le bit 4
 
         switch (etat)
         {
-            case 1: case 7: case 8: case 14:
+            case 1: case 7: case 8: case 14:        // 4 possibilités de décalage positif
                 decalage++;
                 break;
-            case 2: case 4: case 11: case 13:
+            case 2: case 4: case 11: case 13:       // 4 possibilités de décalage négatif
                 decalage--;
                 break;
-            // case 3: case 12:
+            // case 3: case 12:                     // Décalages doubles non pris en considération
             //     decalage += 2;
             //     break;
             // case 6: case 9:
@@ -80,10 +79,15 @@ void encoder::interruption(void)
     }
 }
 
+/// @brief Lit la valeur du décalage actuel
+/// @return le décalage relatif (+/-)
 int8_t encoder::lecture()
 {
+    // Note la valeur actuelle avant de la remettre à 0 (pour le relatif)
     int8_t retour = decalage;
     decalage = 0;
+
+    // Renvoie la bonne valeur
     return retour;
 }
 

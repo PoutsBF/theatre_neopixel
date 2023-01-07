@@ -53,11 +53,15 @@ void setup()
 
     // Initialise le module led en arc
     leds_chapeau.init();        // première étape
-    leds_chapeau.setBrightness(50);
-    leds_chapeau.setSpeed(5000);
-    leds_chapeau.setSegment();
-    leds_chapeau.setColor(0x0000FF);
-    leds_chapeau.setMode(FX_MODE_THEATER_CHASE_RAINBOW);
+    // leds_chapeau.setBrightness(50);
+    // leds_chapeau.setSpeed(5000);
+    // leds_chapeau.setSegment();
+    // leds_chapeau.setColor(0x0000FF);
+    // leds_chapeau.setMode(FX_MODE_THEATER_CHASE_RAINBOW);
+
+    leds_chapeau.setSegment(0, 0, 6, FX_MODE_THEATER_CHASE_RAINBOW, RED, 5000, NO_OPTIONS);
+    leds_chapeau.setSegment(1, 7, 14, FX_MODE_THEATER_CHASE_RAINBOW, RED, 5000, REVERSE);
+
     leds_chapeau.start();
 
     // Initialise les entrées des potentiomètres et leur led
