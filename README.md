@@ -23,4 +23,4 @@ Programmé sur la base d'un arduino leonardo [pinout](/documentation/Pinout-Leon
 [librairie WS2812FX](https://github.com/kitesurfer1404/WS2812FX)
 Leds neopixel [datasheet](/documentation/WS2812.pdf)
 
-![lien](/documentation/VID_20230107_190055.mp4)
+![lien](https://raw.githubusercontent.com/PoutsBF/theatre_neopixel/documentation/VID_20230107_190055.mp4)
