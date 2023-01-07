@@ -15,6 +15,8 @@ gérer l'entrée du bouton du dessus
 
 ## Détection du sens de rotation
 
+Merci à [Paul Stoffregen](https://github.com/PaulStoffregen/Encoder)
+
                                _______         _______       
                    Pin1 ______|       |_______|       |______ Pin1
       negative <---         _______         _______         __      --> positive
