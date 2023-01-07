@@ -59,8 +59,8 @@ void setup()
     // leds_chapeau.setColor(0x0000FF);
     // leds_chapeau.setMode(FX_MODE_THEATER_CHASE_RAINBOW);
 
-    leds_chapeau.setSegment(0, 0, 6, FX_MODE_THEATER_CHASE_RAINBOW, RED, 5000, NO_OPTIONS);
-    leds_chapeau.setSegment(1, 7, 14, FX_MODE_THEATER_CHASE_RAINBOW, RED, 5000, REVERSE);
+    leds_chapeau.setSegment(0, 0, 6, FX_MODE_THEATER_CHASE_RAINBOW, RED, 3000, NO_OPTIONS);
+    leds_chapeau.setSegment(1, 8, 14, FX_MODE_THEATER_CHASE_RAINBOW, RED, 3000, REVERSE);
 
     leds_chapeau.start();
 
