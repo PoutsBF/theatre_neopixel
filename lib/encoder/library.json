@@ -1,15 +1,14 @@
 {
-    "name": "gestionBP",
+    "name": "encoder",
     "version": "1.0.0",
-    "description": "gestion de boutons poussoirs sur ESP8266 avec interruptions et 3 types de messages (court, long et double)",
+    "description": "",
     "authors": {
         "name": "Stéphane Lepoutères",
-        "email": "me@john-smith.com",
+        "email": "stephane.lepoutere@free.fr",
         "url": "https://github.com/PoutsBF/"
     },
-    "license": "Apache-2.0",
+    "license": "MIT",
     "frameworks": [
-        "espressif8266",
         "arduino"
     ]
 }

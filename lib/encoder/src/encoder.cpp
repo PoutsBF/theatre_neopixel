@@ -1,42 +1,47 @@
 /******************************************************************************
-    Gestion des Boutons Poussoirs                   Stéphane Lepoutère (c) 2020
+    Gestion d'un encodeur rotatif                   Stéphane Lepoutère (c) 2020
 
-    Observe l'arrivée de changement d'état sur les BP (interruption)
+    Observe l'arrivée de changement d'état sur les 2 entrées (interruption)
     Gère le débounce
-    Détecte les appuis courts, longs, doubles clics et l'état instantané
-    2020-11-07 : à faire : modification de la philosophie du double clic :
-        un double clic est considéré comme un clic qui arrive dans un délai 
-        court après le précédent. Le premier clic est sensé avoir été pris 
-        en compte.
 */
 
 #include <Arduino.h>
 #include <encoder.h>
 
+// Initialisation des variables statiques
 uint8_t encoder::BP0_pin;
 uint8_t encoder::BP1_pin;
 
 int8_t encoder::decalage;
 
+/// @brief Création de l'objet
+/// @param BP0 patte A de l'encodeur
+/// @param BP1 patte B de l'encodeur
 encoder::encoder(uint8_t BP0, uint8_t BP1)
 {
+    // Fige les pattes
     BP0_pin = BP0;
     BP1_pin = BP1;
+    // Configure les interruptions
     attachInterrupt(digitalPinToInterrupt(BP0_pin), interruption, CHANGE);
     attachInterrupt(digitalPinToInterrupt(BP1_pin), interruption, CHANGE);
 }
 
+/// @brief Initialisation spécifique
+/// @param  void
 void encoder::init(void)
 {
-    // pinMode(BP0_pin, INPUT_PULLUP);
-    // pinMode(BP1_pin, INPUT_PULLUP);
 }
 
+/// @brief Interception de l'interruption
+/// @param  void
 void encoder::interruption(void)
 {
-    static uint8_t BP_p                = 0;
+    // Gestion du rebond (debounce)
     static unsigned long BP_rebond     = 0;
 
+    // Variable stockant l'état lu et précédent, pour la détection du sens de rotation
+    // Voir readme pour l'usage
     static uint8_t etat = 0x00;
 
     unsigned long time = millis();
@@ -82,28 +87,4 @@ int8_t encoder::lecture()
     return retour;
 }
 
-//                           _______         _______       
-//               Pin1 ______|       |_______|       |______ Pin1
-// negative <---         _______         _______         __      --> positive
-//               Pin2 __|       |_______|       |_______|   Pin2
-
-		//	new	new	old	old
-		//	pin2	pin1	pin2	pin1	Result
-		//	----	----	----	----	------
-		//	0	0	0	0	no movement
-		//	0	0	0	1	+1
-		//	0	0	1	0	-1
-		//	0	0	1	1	+2  (assume pin1 edges only)
-		//	0	1	0	0	-1
-		//	0	1	0	1	no movement
-		//	0	1	1	0	-2  (assume pin1 edges only)
-		//	0	1	1	1	+1
-		//	1	0	0	0	+1
-		//	1	0	0	1	-2  (assume pin1 edges only)
-		//	1	0	1	0	no movement
-		//	1	0	1	1	-1
-		//	1	1	0	0	+2  (assume pin1 edges only)
-		//	1	1	0	1	-1
-		//	1	1	1	0	+1
-		//	1	1	1	1	no movement
 //-------------------------------------------------- That's all, Folks !!! ----
